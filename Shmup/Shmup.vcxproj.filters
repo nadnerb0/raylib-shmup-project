@@ -1,0 +1,84 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Sprites">
+      <UniqueIdentifier>{9112b707-12ef-412f-8b19-f09967d45d25}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Audio">
+      <UniqueIdentifier>{42ab8904-df3b-4895-9aed-ccae8f429683}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Raylib examples">
+      <UniqueIdentifier>{a89b72f0-6875-4286-bc2c-b3882e4d21da}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\Raylib testing\Raylib testing\enemy.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Raylib testing\Raylib testing\main.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Raylib testing\Raylib testing\player.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Raylib testing\Raylib testing\utils.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Raylib testing\Raylib testing\bullet.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Raylib testing\Raylib testing\debug.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\Raylib testing\Raylib testing\enemy.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Raylib testing\Raylib testing\player.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Raylib testing\Raylib testing\utils.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Raylib testing\Raylib testing\bullet.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Raylib testing\Raylib testing\debug.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Textures\redShip.png">
+      <Filter>Sprites</Filter>
+    </Image>
+    <Image Include="Sprites\whiteShip.png">
+      <Filter>Sprites</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <Media Include="Audio\playerPew.wav">
+      <Filter>Audio</Filter>
+    </Media>
+    <Media Include="Audio\playerPew2.wav">
+      <Filter>Audio</Filter>
+    </Media>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="example.txt">
+      <Filter>Raylib examples</Filter>
+    </Text>
+  </ItemGroup>
+</Project>
