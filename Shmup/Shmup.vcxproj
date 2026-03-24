@@ -37,6 +37,9 @@
     <ClInclude Include="..\..\Raylib testing\Raylib testing\utils.h" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="Sprites\bullet.png" />
+    <Image Include="Sprites\laserCharge.png" />
+    <Image Include="Sprites\laserGreen.png" />
     <Image Include="Sprites\whiteShip.png" />
     <Image Include="Textures\redShip.png" />
   </ItemGroup>

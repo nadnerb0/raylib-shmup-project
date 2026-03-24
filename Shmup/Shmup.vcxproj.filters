@@ -67,6 +67,15 @@
     <Image Include="Sprites\whiteShip.png">
       <Filter>Sprites</Filter>
     </Image>
+    <Image Include="Sprites\bullet.png">
+      <Filter>Sprites</Filter>
+    </Image>
+    <Image Include="Sprites\laserCharge.png">
+      <Filter>Sprites</Filter>
+    </Image>
+    <Image Include="Sprites\laserGreen.png">
+      <Filter>Sprites</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <Media Include="Audio\playerPew.wav">
