@@ -19,22 +19,34 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\Raylib testing\Raylib testing\bullet.c" />
-    <ClCompile Include="..\..\Raylib testing\Raylib testing\debug.c" />
-    <ClCompile Include="..\..\Raylib testing\Raylib testing\enemy.c" />
-    <ClCompile Include="..\..\Raylib testing\Raylib testing\main.c" />
-    <ClCompile Include="..\..\Raylib testing\Raylib testing\player.c" />
-    <ClCompile Include="..\..\Raylib testing\Raylib testing\utils.c" />
+    <ClCompile Include="bullet.c" />
+    <ClCompile Include="debug.c" />
+    <ClCompile Include="enemy.c" />
+    <ClCompile Include="main.c" />
+    <ClCompile Include="mainMenu.c" />
+    <ClCompile Include="player.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="utils.c" />
     <Text Include="example.txt">
       <FileType>CppCode</FileType>
     </Text>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\Raylib testing\Raylib testing\bullet.h" />
-    <ClInclude Include="..\..\Raylib testing\Raylib testing\debug.h" />
-    <ClInclude Include="..\..\Raylib testing\Raylib testing\enemy.h" />
-    <ClInclude Include="..\..\Raylib testing\Raylib testing\player.h" />
-    <ClInclude Include="..\..\Raylib testing\Raylib testing\utils.h" />
+    <ClInclude Include="bullet.h" />
+    <ClInclude Include="debug.h" />
+    <ClInclude Include="enemy.h" />
+    <ClInclude Include="mainMenu.h" />
+    <ClInclude Include="player.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="utils.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Sprites\bullet.png" />
