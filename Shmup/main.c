@@ -6,6 +6,7 @@
 #include "player.h"
 #include "debug.h"
 #include "mainMenu.h"
+#include "gameOver.h"
 
 #define MAX(a, b) ((a)>(b)? (a) : (b))
 #define MIN(a, b) ((a)<(b)? (a) : (b))
@@ -95,9 +96,15 @@ int main()
     Rectangle mainMenuRecs[3] = { 0 };
     CreateMainMenu(mainMenuRecs);
 
+    Rectangle gameOverRecs[2] = { 0 };
+    CreateGameOverRecs(gameOverRecs);
+
     // GAMELOOP
     while (!WindowShouldClose())
     {
+        // Manual GameState setting
+        //gameState = DEAD;
+
         float dt = GetFrameTime();
 
         float scale = MIN((float)GetScreenWidth() / xRes, (float)GetScreenHeight() / yRes);
@@ -109,14 +116,19 @@ int main()
         virtualMouse.y = (mouse.y - (GetScreenHeight() - (yRes * scale)) * 0.5f) / scale;
         virtualMouse = Vector2Clamp(virtualMouse, (Vector2) { 0, 0 }, (Vector2) { (float)xRes, (float)yRes });
 
-        //gameState = PLAYING;
+        // Debug mode
+        DebugModeToggle(&debugMode);
 
         // Updating game logic
         switch (gameState)
         {
         case MENU:
             // Menu behaviour
-            gameState = UpdateGameState(mainMenuRecs, virtualMouse);
+            gameState = MenuToPlaying(mainMenuRecs, virtualMouse);
+            if (gameState == PLAYING)
+            {
+                // Reinitialize player/waves
+            }
             break;
         case PLAYING:               // Verandering: in veel van de volgende functies wordt elke keer geloopt door de lijsten, herschrijf het dat er het liefst maar 1x per lijst geloopt wordt per frame
         {
@@ -138,8 +150,6 @@ int main()
                 PlayerDeath(&player);
                 gameState = DEAD;
             }
-            // Debug mode
-            DebugModeToggle(&debugMode);
             break;
         }
         case PAUSED:
@@ -148,7 +158,7 @@ int main()
             break;
         case DEAD:
             // Gameover
-
+            gameState = GameOverToMenu(gameOverRecs, virtualMouse);
             break;
         }
 
@@ -174,7 +184,7 @@ int main()
             // Paused drawing (freeze all and PAUSED in middle?)
             break;
         case DEAD:
-            // Keeps drawing last frame
+            // Keeps drawing final frame
             BulletDrawing(bullets, MAX_BULLETS, textures);
             PlayerDrawing(&player, redShip, whiteShip);
             LaserDrawing(lasers, MAX_LASERS);
@@ -183,7 +193,8 @@ int main()
             DrawText(TextFormat("Score: %d", playerScore), xRes - 100, 0, 10, WHITE);
             DrawText(TextFormat("Player HP: %.0f", player.hp), xRes - 100, 10, 10, WHITE);
 
-            // GameOver drawing (freeze all,  add GameOver with back to menu button)
+            // GameOver drawing/overlay
+            GameOverDrawing(gameOverRecs);
 
             break;
         }
@@ -221,6 +232,7 @@ int main()
             DrawText(TextFormat("Bullets active: %d", bulletAmountActive), 0, 20, 10, WHITE);
             DrawText(TextFormat("Enemies active: %d", enemiesActive), 0, 30, 10, WHITE);
             DrawText(TextFormat("Lasers active: %d", lasersActive), 0, 40, 10, WHITE);
+            DrawText(TextFormat("GameState: %d", gameState), 0, 50, 10, WHITE);
             //player.hp = 100;
         }
         EndTextureMode();

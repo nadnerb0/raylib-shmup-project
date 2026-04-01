@@ -1,7 +1,14 @@
 #include "raylib.h"
 #include "utils.h"
 
-void CreateMainMenu(Rectangle rectangles[])
+typedef enum
+{
+    TITLE,
+    PLAY,
+    MUTE
+}MainMenuRecs;
+
+void CreateMainMenu(Rectangle mainMenuRecs[])
 {
     Rectangle Title = 
     { 
@@ -34,34 +41,35 @@ void CreateMainMenu(Rectangle rectangles[])
     Mute.x = 0;
     Mute.y = 0;
 
-    rectangles[PLAY] = Play;
-    rectangles[TITLE] = Title;
-    rectangles[MUTE] = Mute;
+    mainMenuRecs[PLAY] = Play;
+    mainMenuRecs[TITLE] = Title;
+    mainMenuRecs[MUTE] = Mute;
 }
 
-void DrawMainMenu(Rectangle rectangles[])
+void DrawMainMenu(Rectangle mainMenuRecs[])
 {
     // Title
     int titleFontSize = 100;
-    DrawRectangleRec(rectangles[TITLE], WHITE);
+    DrawRectangleRec(mainMenuRecs[TITLE], WHITE);
     int titleWidth = MeasureText("SMHUP", titleFontSize);
-    DrawText("SHMUP", rectangles[TITLE].x + rectangles[TITLE].width / 2 - titleWidth / 2, rectangles[TITLE].y, titleFontSize, BLACK);
+    DrawText("SHMUP", mainMenuRecs[TITLE].x + mainMenuRecs[TITLE].width / 2 - titleWidth / 2, mainMenuRecs[TITLE].y, titleFontSize, BLACK);
 
     // Play
     int playFontSize = 50;
-    DrawRectangleRec(rectangles[PLAY], WHITE);
+    DrawRectangleRec(mainMenuRecs[PLAY], WHITE);
     int playWidth = MeasureText("PLAY", playFontSize);
-    DrawText("PLAY", rectangles[PLAY].x + rectangles[PLAY].width / 2 - playWidth / 2, rectangles[PLAY].y, playFontSize, BLACK);
+    DrawText("PLAY", mainMenuRecs[PLAY].x + mainMenuRecs[PLAY].width / 2 - playWidth / 2, mainMenuRecs[PLAY].y, playFontSize, BLACK);
 
-    DrawRectangleRec(rectangles[MUTE], WHITE);
+    DrawRectangleRec(mainMenuRecs[MUTE], WHITE);
 }
 
-GameState UpdateGameState(Rectangle rectangles[], Vector2 mousePos)
+GameState MenuToPlaying(Rectangle mainMenuRecs[], Vector2 mousePos)
 {
-    if (CheckCollisionPointRec(mousePos, rectangles[PLAY]))
+    if (CheckCollisionPointRec(mousePos, mainMenuRecs[PLAY]))
     {
         SetMouseCursor(MOUSE_CURSOR_POINTING_HAND);
-        if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) return PLAYING;
+        if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) 
+            return PLAYING;
     }
     else
     {

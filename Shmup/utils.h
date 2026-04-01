@@ -14,13 +14,6 @@ typedef enum
     DEAD
 }GameState;
 
-typedef enum
-{
-    TITLE, 
-    PLAY, 
-    MUTE
-}MainMenuRecs;
-
 typedef struct
 {
     Texture2D laser;

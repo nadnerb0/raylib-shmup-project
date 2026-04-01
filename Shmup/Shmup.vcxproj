@@ -22,6 +22,7 @@
     <ClCompile Include="bullet.c" />
     <ClCompile Include="debug.c" />
     <ClCompile Include="enemy.c" />
+    <ClCompile Include="gameOver.c" />
     <ClCompile Include="main.c" />
     <ClCompile Include="mainMenu.c" />
     <ClCompile Include="player.c">
@@ -39,6 +40,7 @@
     <ClInclude Include="bullet.h" />
     <ClInclude Include="debug.h" />
     <ClInclude Include="enemy.h" />
+    <ClInclude Include="gameOver.h" />
     <ClInclude Include="mainMenu.h" />
     <ClInclude Include="player.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
