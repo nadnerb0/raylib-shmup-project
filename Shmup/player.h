@@ -25,10 +25,14 @@ typedef struct
 
 void PlayerInit(Player* player, Texture2D redSprite);
 
+void UpdatePlayer(Player* player, float dt);
+
 void ShipMovement(Player* player, float dt, float xRes, float yRes);
 
-void PlayerDrawing(Player* player, Texture2D redSprite, Texture2D whiteSprite);
+void PlayerDamaged(Player* player);
 
 void PlayerDeath(Player* player);
+
+void PlayerDrawing(Player* player, Texture2D redSprite, Texture2D whiteSprite);
 
 #endif // PLAYER_H

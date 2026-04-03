@@ -43,15 +43,17 @@ typedef struct
     bool isPlayerLaser;
 }Laser;
 
-void BulletSpawning(Player* player, Bullet bullets[], Laser lasers[], Enemy enemies[], int maxBullets, int maxLasers, int maxEnemies, float dt, Sound playerPew, Textures textures);
+void SpawnPlayerBullet(Player* player, Bullet bullets[], int maxBullets, Sound playerPew, Texture2D texture, float dt);
 
-void BulletUpdate(Bullet bullets[], int maxBullets, float dt);
+void SpawnEnemyBullet(Enemy* enemy, Bullet bullets[], int maxBullets, Sound enemyPew, Texture2D texture, float dt);
 
-void BulletDrawing(Bullet bullets[], int maxBullets, Textures textures);
+void SpawnEnemyLaser(Enemy* enemy, Laser lasers[], int maxlasers, Sound enemyLaserSound, Texture2D textureLaser, Texture2D textureCharge, float dt);
 
-//void LaserSpawning();
+void BulletUpdate(Bullet* bullet, float dt);
 
-void LaserUpdate(Laser lasers[], int maxLasers, float dt);
+void BulletDrawing(Bullet bullets[], int maxBullets);
+
+void LaserUpdate(Laser* laser, float dt);
 
 void LaserDrawing(Laser lasers[], int maxLasers);
 

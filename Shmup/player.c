@@ -24,25 +24,12 @@ void PlayerInit(Player* player, Texture2D redSprite)
     player->rotation = 0.0f;
 }
 
-void PlayerDrawing(Player* player, Texture2D redSprite, Texture2D whiteSprite)
+void UpdatePlayer(Player* player, float dt)
 {
-    // Sprite
-    if (player->invincibility > 0 && (int)(GetTime() * 10) % 2 == 0 && !player->isDead)
+    if (player->invincibility > 0.0f)
     {
-        player->playerSprite = whiteSprite;
+        player->invincibility -= dt;
     }
-    else
-    {
-        player->playerSprite = redSprite;
-    }
-
-    // Drawing player sprite
-    DrawTexturePro(player->playerSprite, player->sourceRec, player->destRec, player->origin, player->rotation, WHITE);
-}
-
-void PlayerDeath(Player* player)
-{
-    player->isDead = true;
 }
 
 void ShipMovement(Player* player, float dt, float xRes, float yRes)
@@ -95,3 +82,29 @@ void ShipMovement(Player* player, float dt, float xRes, float yRes)
     ClampB(&player->position.y, 0.0f + player->height / 2, yRes - player->height / 2);
 }
 
+void PlayerDamaged(Player* player)
+{
+    player->hp -= 1;
+    player->invincibility = 1.0f;
+}
+
+void PlayerDeath(Player* player)
+{
+    player->isDead = true;
+}
+
+void PlayerDrawing(Player* player, Texture2D redSprite, Texture2D whiteSprite)
+{
+    // Sprite
+    if (player->invincibility > 0 && (int)(GetTime() * 10) % 2 == 0 && !player->isDead)
+    {
+        player->playerSprite = whiteSprite;
+    }
+    else
+    {
+        player->playerSprite = redSprite;
+    }
+
+    // Drawing player sprite
+    DrawTexturePro(player->playerSprite, player->sourceRec, player->destRec, player->origin, player->rotation, WHITE);
+}

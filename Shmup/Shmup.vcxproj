@@ -20,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="bullet.c" />
+    <ClCompile Include="collision.c" />
     <ClCompile Include="debug.c" />
     <ClCompile Include="enemy.c" />
     <ClCompile Include="gameOver.c" />
@@ -38,6 +39,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="bullet.h" />
+    <ClInclude Include="collision.h" />
     <ClInclude Include="debug.h" />
     <ClInclude Include="enemy.h" />
     <ClInclude Include="gameOver.h" />

@@ -5,10 +5,9 @@
 #include "enemy.h"
 #include <stdlib.h>
 
-void BulletSpawning(Player* player, Bullet bullets[], Laser lasers[], Enemy enemies[], int maxBullets, int maxLasers, int maxEnemies, float dt, Sound playerPew, Textures textures)
+void SpawnPlayerBullet(Player* player, Bullet bullets[], int maxBullets, Sound playerPew, Texture2D texture, float dt)
 {
     player->shootTimer += dt;
-    // Player bullets
     if (IsKeyDown(KEY_SPACE) && (player->shootTimer >= player->fireRate))
     {
         bool skipThis = false;
@@ -20,7 +19,7 @@ void BulletSpawning(Player* player, Bullet bullets[], Laser lasers[], Enemy enem
                 bullets[i] = (Bullet)
                 {
                     .yDir = -1.0f,
-                    .texture = textures.bullet,
+                    .texture = texture,
                     .speed = 1000.0f,
                     .width = 5.0f,
                     .height = 15.0f,
@@ -42,7 +41,7 @@ void BulletSpawning(Player* player, Bullet bullets[], Laser lasers[], Enemy enem
                 bullets[i] = (Bullet)
                 {
                     .yDir = -1.0f,
-                    .texture = textures.bullet,
+                    .texture = texture,
                     .speed = 1000.0f,
                     .width = 5.0f,
                     .height = 15.0f,
@@ -57,102 +56,100 @@ void BulletSpawning(Player* player, Bullet bullets[], Laser lasers[], Enemy enem
             }
         }
     }
-    // Enemy bullets
-    for (int i = 0; i < maxEnemies; i++)
-    {
-        enemies[i].shootTimer += dt;
+}
 
-        if (enemies[i].active && enemies[i].shootTimer >= enemies[i].fireRate)
+void SpawnEnemyBullet(Enemy* enemy, Bullet bullets[], int maxBullets, Sound enemyPew, Texture2D texture, float dt)
+{
+    if (enemy->active && (enemy->shootTimer >= enemy->fireRate))
+    {
+        if (enemy->enemyType == GRUNT)
         {
-            if (enemies[i].enemyType == GRUNT)
+            for (int j = 0; j < maxBullets; j++)
             {
-                for (int j = 0; j < maxBullets; j++)
+                if (!bullets[j].active)
                 {
-                    if (!bullets[j].active)
+                    bullets[j] = (Bullet)
                     {
-                        bullets[j] = (Bullet)
-                        {
-                            .position = enemies[i].position,
-                            .texture = textures.enemyBullet,
-                            .yDir = 1.0f,
-                            .speed = 500.0f,
-                            .width = 2.0f,
-                            .height = 20.0f,
-                            .offset = 0.0f,
-                            .active = true,
-                            .isPlayerBullet = false
-                        };
-                        bullets[j].position.x = enemies[i].position.x - bullets[j].width / 2;
-                        bullets[j].position.y = enemies[i].position.y + 5;
-                        bullets[j].hitbox = (Rectangle){ bullets[j].position.x, bullets[j].position.y, bullets[j].width, bullets[j].height };
-                        enemies[i].shootTimer = 0.0f;
-                        break;
-                    }
-                }
-            }
-            if (enemies[i].enemyType == SNIPER)
-            {
-                for (int j = 0; j < maxLasers; j++)
-                {
-                    if (!lasers[j].active)
-                    {
-                        lasers[j] = (Laser)
-                        {
-                            .texture = textures.laser,
-                            .chargeTexture = textures.laserCharge,
-                            .laserTimer = 0.0f,
-                            .chargeTime = 0.5f,
-                            .fireTime = 1.0f,
-                            .width = 32.0f,
-                            .height = 700.0f,
-                            .offset = 0.0f,
-                            .sniper = &enemies[i],
-                            .isDamaging = false,
-                            .active = true,
-                            .isPlayerLaser = false
-                        };
-                        lasers[j].position.y = enemies[i].position.y;
-                        lasers[j].position.x = enemies[i].position.x - lasers[j].width / 2;
-                        enemies[i].shootTimer = 0.0f;
-                        enemies[i].isSniping = true;
-                        break;
-                    }
+                        .position = enemy->position,
+                        .texture = texture,
+                        .yDir = 1.0f,
+                        .speed = 500.0f,
+                        .width = 2.0f,
+                        .height = 20.0f,
+                        .offset = 0.0f,
+                        .active = true,
+                        .isPlayerBullet = false
+                    };
+                    bullets[j].position.x = enemy->position.x - bullets[j].width / 2;
+                    bullets[j].position.y = enemy->position.y + 5;
+                    bullets[j].hitbox = (Rectangle){ bullets[j].position.x, bullets[j].position.y, bullets[j].width, bullets[j].height };
+                    enemy->shootTimer = 0.0f;
+                    break;
                 }
             }
         }
     }
 }
 
-void LaserUpdate(Laser lasers[], int maxLasers, float dt)
+void SpawnEnemyLaser(Enemy* enemy, Laser lasers[], int maxLasers, Sound enemyLaserSound, Texture2D textureLaser, Texture2D textureCharge, float dt)
 {
-    for (int i = 0; i < maxLasers; i++)
+    if (enemy->enemyType == SNIPER && !enemy->isSniping && (enemy->shootTimer >= enemy->fireRate))
     {
-        if (lasers[i].active && !lasers[i].isPlayerLaser)
+        for (int i = 0; i < maxLasers; i++)
         {
-            if (!lasers[i].sniper->active)
+            if (!lasers[i].active)
             {
-                lasers[i] = (Laser){ 0 };
-                continue;
+                lasers[i] = (Laser)
+                {
+                    .texture = textureLaser,
+                    .chargeTexture = textureCharge,
+                    .laserTimer = 0.0f,
+                    .chargeTime = 0.5f,
+                    .fireTime = 1.0f,
+                    .width = 32.0f,
+                    .height = 700.0f,
+                    .offset = 0.0f,
+                    .sniper = enemy,
+                    .isDamaging = false,
+                    .active = true,
+                    .isPlayerLaser = false
+                };
+                lasers[i].position.y = enemy->position.y;
+                lasers[i].position.x = enemy->position.x - lasers[i].width / 2;
+                enemy->isSniping = true;
+                break;
             }
+        }
+    }
+}
 
-            lasers[i].laserTimer += dt;
+void LaserUpdate(Laser* laser, float dt)
+{
+    if (laser->active && !laser->isPlayerLaser)
+    {
+        if (!laser->sniper->active)
+        {
+            *laser = (Laser){ 0 };
+            return;
+        }
 
-            if (lasers[i].laserTimer < lasers[i].chargeTime)
-            {
-                lasers[i].isDamaging = false;
-            }
-            else
-            {
-                lasers[i].hitbox = (Rectangle){ lasers[i].position.x + lasers[i].width/6, lasers[i].position.y, lasers[i].width/3*2, lasers[i].height };
-                lasers[i].isDamaging = true;
-            }
+        laser->laserTimer += dt;
 
-            if (lasers[i].laserTimer > lasers[i].chargeTime + lasers[i].fireTime)
-            {
-                lasers[i].sniper->isSniping = false;
-                lasers[i] = (Laser) { 0 };
-                continue;
-            }
+        if (laser->laserTimer < laser->chargeTime)
+        {
+            laser->isDamaging = false;
+        }
+        else
+        {
+            laser->hitbox = (Rectangle){ laser->position.x + laser->width/6, laser->position.y, laser->width/3*2, laser->height };
+            laser->isDamaging = true;
+        }
+
+        if (laser->laserTimer > laser->chargeTime + laser->fireTime)
+        {
+            laser->sniper->isSniping = false;
+            laser->sniper->shootTimer = 0.0f;
+            *laser = (Laser) { 0 };
         }
     }
 }
@@ -166,45 +163,27 @@ void LaserDrawing(Laser lasers[], int maxLasers)
             if (lasers[i].laserTimer < lasers[i].chargeTime)
             {
                 DrawTexture(lasers[i].chargeTexture, lasers[i].position.x - lasers[i].width/2, lasers[i].position.y, WHITE);
-                //DrawRectangle(lasers[i].position.x + lasers[i].width / 4, lasers[i].position.y, lasers[i].width / 2, lasers[i].height, WHITE);
             }
             else
             {
                 DrawTexture(lasers[i].texture, lasers[i].position.x, lasers[i].position.y, WHITE);
-                //DrawRectangle(lasers[i].position.x, lasers[i].position.y, lasers[i].width, lasers[i].height, RED);
             }
         }
     }
 }
 
-void BulletUpdate(Bullet bullets[], int maxBullets, float dt)
+void BulletUpdate(Bullet* bullet, float dt)
 {
-    for (int i = 0; i < maxBullets; i++)
+    bullet->position.y += bullet->yDir * bullet->speed * dt;
+    bullet->hitbox.y += bullet->yDir * bullet->speed * dt;
+
+    if (bullet->position.y < 0 || bullet->position.y > yRes)
     {
-        // Player bullets
-        if (bullets[i].active && bullets[i].isPlayerBullet)
-        {
-            bullets[i].position.y += bullets[i].yDir * bullets[i].speed * dt;
-            bullets[i].hitbox.y += bullets[i].yDir * bullets[i].speed * dt;
-            if (bullets[i].position.y < 0)
-            {
-                bullets[i].active = false;
-            }
-        }
-        // Enemy Bullets
-        if (bullets[i].active && !bullets[i].isPlayerBullet)
-        {
-            bullets[i].position.y += bullets[i].yDir * bullets[i].speed * dt;
-            bullets[i].hitbox.y += bullets[i].yDir * bullets[i].speed * dt;
-            if (bullets[i].position.y > yRes)
-            {
-                bullets[i].active = false;
-            }
-        }
+        bullet->active = false;
     }
 }
 
-void BulletDrawing(Bullet bullets[], int maxBullets, Textures textures)
+void BulletDrawing(Bullet bullets[], int maxBullets)
 {
     // Drawing bullets
     for (int i = 0; i < maxBullets; i++)

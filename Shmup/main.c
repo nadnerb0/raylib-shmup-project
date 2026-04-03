@@ -7,6 +7,7 @@
 #include "debug.h"
 #include "mainMenu.h"
 #include "gameOver.h"
+#include "collision.h"
 
 #define MAX(a, b) ((a)>(b)? (a) : (b))
 #define MIN(a, b) ((a)<(b)? (a) : (b))
@@ -16,7 +17,6 @@
 #define MAX_LASERS 10
 
 void HandleCollision(Player* player, Enemy enemies[], Bullet bullets[], Laser lasers[], int* bulletsHit, float dt);
-
 
 int main()
 {
@@ -130,21 +130,57 @@ int main()
                 // Reinitialize player/waves
             }
             break;
-        case PLAYING:               // Verandering: in veel van de volgende functies wordt elke keer geloopt door de lijsten, herschrijf het dat er het liefst maar 1x per lijst geloopt wordt per frame
+        case PLAYING:
         {
-            // Playing movement
+            // Player movement
             ShipMovement(&player, dt, xRes, yRes);
-            // Spawning bullets, enemies etc.
-            BulletSpawning(&player, bullets, lasers, enemies, MAX_BULLETS, MAX_LASERS, MAX_ENEMIES, dt, playerShootSound, textures);
+            UpdatePlayer(&player, dt);
+
+            // Player bullet spawning
+            SpawnPlayerBullet(&player, bullets, MAX_BULLETS, playerShootSound, textures.bullet, dt);
+
+            // Temporary spawning mechanics
             int waveSize = sizeof(wave1) / sizeof(wave1[0]);
             EnemySpawning(enemies, MAX_ENEMIES, wave1, waveSize, &waveTimer, dt, textures);
-            // Updating position and state of entities
-            EnemyUpdate(enemies, wave1, MAX_ENEMIES, &playerScore, dt);
-            BulletUpdate(bullets, MAX_BULLETS, dt);
-            LaserUpdate(lasers, MAX_LASERS, dt);
-            // Check collisions
-            HandleCollision(&player, enemies, bullets, lasers, &bulletsHit, dt);
-            // Player death handling
+
+            // Enemy loop
+            for (int i = 0; i < MAX_ENEMIES; i++)
+            {
+                // moet spawnen? -> spawn
+
+                if (!enemies[i].active)
+                    continue;
+
+                EnemyUpdate(&enemies[i], wave1, &playerScore, dt);
+                if (enemies[i].enemyType == GRUNT)
+                {
+                    SpawnEnemyBullet(&enemies[i], bullets, MAX_BULLETS, playerShootSound, textures.enemyBullet, dt);
+                }
+                if (enemies[i].enemyType == SNIPER)
+                {
+                    SpawnEnemyLaser(&enemies[i], lasers, MAX_LASERS, playerShootSound, textures.laser, textures.laserCharge, dt);
+                }
+                HandlePlayerCollision(&player, &enemies[i]);
+            }
+            // Bullet loop
+            for (int i = 0; i < MAX_BULLETS; i++)
+            {
+                if (!bullets[i].active)
+                    continue;
+
+                BulletUpdate(&bullets[i], dt);
+                HandleBulletCollision(&player, enemies, &bullets[i], MAX_ENEMIES, &bulletsHit, dt);
+            }
+            // Laser loop
+            for (int i = 0; i < MAX_LASERS; i++)
+            {
+                if (!lasers[i].active)
+                    continue;
+
+                LaserUpdate(&lasers[i], dt);
+                HandleLaserCollision(&player, lasers[i], dt);
+            }
+            
             if (player.hp <= 0)
             {
                 PlayerDeath(&player);
@@ -254,77 +290,3 @@ int main()
     CloseWindow();
     return 0;
 }
-
-void HandleCollision(Player* player, Enemy enemies[], Bullet bullets[], Laser lasers[], int* bulletsHit, float dt)
-{
-    player->invincibility -= dt;
-    // Enemies
-    for (int i = 0; i < MAX_ENEMIES; i++)
-    {
-        // Skip inactive enemies
-        if (!enemies[i].active)
-            continue;
-
-        // Player/enemy collision
-        // NOTE: needs a timer before registering again, otherwise 1 collision = complete death and destruction
-        if (CheckCollisionCircleRec(player->position, player->hitboxRadius, enemies[i].hitbox) )
-        {
-            player->hp -= 1;
-            enemies[i].hp -= 1;
-            player->invincibility = 1.0f;
-        }
-
-        // Bullet collision
-        for (int j = 0; j < MAX_BULLETS; j++)
-        {
-            if (!bullets[j].active)
-                continue;
-
-            // Player bullets
-            if (bullets[j].isPlayerBullet)
-            {
-                Bullet checkBullet = bullets[j];
-                checkBullet.position.y += checkBullet.yDir * bullets[j].speed * dt;
-                if (CheckCollisionRecs(enemies[i].hitbox, checkBullet.hitbox))
-                {
-                    (*bulletsHit)++;
-                    enemies[i].hp -= 1;
-                    bullets[j].active = false;
-                }
-            }
-            // Enemy bullets
-            else if (!bullets[j].isPlayerBullet)
-            {
-                if (!(player->invincibility <= 0))
-                    continue;
-
-                Bullet checkBullet = bullets[j];
-                checkBullet.position.y += checkBullet.yDir * bullets[j].speed * dt;
-                if (CheckCollisionCircleRec(player->position, player->hitboxRadius, checkBullet.hitbox))
-                {
-                    (*bulletsHit)++;
-                    player->hp -= 1;
-                    player->invincibility = 1.0f;
-                    bullets[j].active = false;
-                }
-            }
-        }
-    }
-    // Lasers
-    for (int i = 0; i < MAX_LASERS; i++)
-    {
-        if (lasers[i].isDamaging)
-        {
-            if (!(player->invincibility <= 0))
-                continue;
-
-            if (CheckCollisionCircleRec(player->position, player->hitboxRadius, lasers[i].hitbox))
-            {
-                (*bulletsHit)++;
-                player->hp -= 1;
-                player->invincibility = 1.0f;
-            }
-        }
-    }
-}
-

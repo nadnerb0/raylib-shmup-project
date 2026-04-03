@@ -49,7 +49,7 @@ void InitEnemy(Enemy* enemy, EnemyType enemyType, Vector2 position, Vector2 velo
 
 void EnemySpawning(Enemy enemies[], int maxEnemies, SpawnEvent wave[], int waveSize, float* waveTimer, float dt, Textures textures);
 
-void EnemyUpdate(Enemy enemies[], SpawnEvent wave[], int maxEnemies, int* playerScore, float dt);
+void EnemyUpdate(Enemy* enemy, SpawnEvent wave[], int* playerScore, float dt);
 
 void EnemyMovement(Enemy* enemy, float dt);
 

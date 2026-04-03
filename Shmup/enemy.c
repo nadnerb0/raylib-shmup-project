@@ -57,35 +57,30 @@ void EnemySpawning(Enemy enemies[], int maxEnemies, SpawnEvent wave[], int waveS
     }
 }
 
-void EnemyUpdate(Enemy enemies[], SpawnEvent wave[], int maxEnemies, int* playerScore, float dt)
+void EnemyUpdate(Enemy* enemy, SpawnEvent wave[], int* playerScore, float dt)
 {
-    for (int i = 0; i < maxEnemies; i++)
+    EnemyMovement(enemy, dt);
+
+    enemy->shootTimer += dt;
+
+    // Set hasEnteredBounds flag once enemy enters bounds
+    if (!enemy->hasEnteredBounds)
     {
-        // Skip inactive enemies
-        if (!enemies[i].active) 
-            continue;
+        if (IsInBounds(*enemy)) 
+            enemy->hasEnteredBounds = true;
+    }
 
-        EnemyMovement(&enemies[i], dt);
-
-        // Set hasEnteredBounds flag once enemy enters bounds
-        if (!enemies[i].hasEnteredBounds)
-        {
-            if (IsInBounds(enemies[i])) enemies[i].hasEnteredBounds = true;
-        }
-
-        // Despawning enemies that are out of screen
-        if (enemies[i].hasEnteredBounds && 
-            IsInBounds(enemies[i]) == false &&
-            enemies[i].enemyType != SNIPER)         // Snipers bounce between border, no despawn on bounds check
-        {
-            enemies[i] = (Enemy){ 0 };
-        }
-        
-        // Check hp
-        if (enemies[i].hp <= 0)
-        {
-            EnemyDeath(&enemies[i], playerScore);
-        }
+    // Despawning enemies that are out of screen
+    if (enemy->hasEnteredBounds && 
+        IsInBounds(*enemy) == false &&
+        enemy->enemyType != SNIPER)         // Snipers bounce between border, no despawn on bounds check
+    {
+        *enemy = (Enemy){ 0 };
+    }
+    // Check hp
+    else if (enemy->hp <= 0)
+    {
+        EnemyDeath(enemy, playerScore);
     }
 }
 
@@ -100,7 +95,7 @@ void EnemyMovement(Enemy* enemy, float dt)
         enemy->hitbox.y += enemy->velocity.y * dt;
     }
 
-    if (enemy->enemyType == SNIPER && !enemy->isSniping)    // No movement while sniping
+    else if (enemy->enemyType == SNIPER && !enemy->isSniping)    // No movement while sniping
     {
         enemy->position.x += enemy->velocity.x * dt;
         enemy->position.y += enemy->velocity.y * dt;
@@ -117,9 +112,12 @@ void EnemyMovement(Enemy* enemy, float dt)
 
 void EnemyDeath(Enemy* enemy, int* playerScore)
 {
-    if (enemy->enemyType == GRUNT)  *playerScore += 10;
-    else if (enemy->enemyType == FODDER) *playerScore += 5;
-    else if (enemy->enemyType == SNIPER)  *playerScore += 20;
+    if (enemy->enemyType == GRUNT)  
+        *playerScore += 10;
+    else if (enemy->enemyType == FODDER) 
+        *playerScore += 5;
+    else if (enemy->enemyType == SNIPER)  
+        *playerScore += 20;
 
     *enemy = (Enemy){ 0 };
 }
