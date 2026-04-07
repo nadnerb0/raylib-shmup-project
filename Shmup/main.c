@@ -8,6 +8,7 @@
 #include "mainMenu.h"
 #include "gameOver.h"
 #include "collision.h"
+#include "background.h"
 
 #define MAX(a, b) ((a)>(b)? (a) : (b))
 #define MIN(a, b) ((a)<(b)? (a) : (b))
@@ -15,8 +16,7 @@
 #define MAX_BULLETS 100
 #define MAX_ENEMIES 20
 #define MAX_LASERS 10
-
-void HandleCollision(Player* player, Enemy enemies[], Bullet bullets[], Laser lasers[], int* bulletsHit, float dt);
+#define MAX_STARS 100
 
 int main()
 {
@@ -55,6 +55,7 @@ int main()
     Texture2D enemySniper = LoadTexture("Sprites/enemySniper.png");
     Texture2D enemyGrunt = LoadTexture("Sprites/enemygrunt.png");
     Texture2D enemyBullet = LoadTexture("Sprites/enemyBullet.png");
+    Texture2D star = LoadTexture("Sprites/star.png");
 
     Textures textures = 
     {
@@ -63,18 +64,27 @@ int main()
         .laserCharge = laserCharge,
         .enemySniper = enemySniper,
         .enemyGrunt = enemyGrunt,
-        .enemyBullet = enemyBullet
+        .enemyBullet = enemyBullet,
+        .star = star
     };
 
     // Loading sounds
     Sound playerShootSound = LoadSound("Audio/playerPew.wav");
 
+    // Star pool initialization
+    Star stars[MAX_STARS] = { 0 };
     // Enemy pool initialization
     Enemy enemies[MAX_ENEMIES] = { 0 };
     // Bullet pool initialization
     Bullet bullets[MAX_BULLETS] = { 0 };
     // Laser pool initialization
     Laser lasers[MAX_LASERS] = { 0 };
+
+    // Initialize starting background
+    InitBackground(stars);
+    // Background timers initialization
+    float starTimerFront = 0.0f;
+    float starTimerBack = 0.0f;
 
     // Statistic instantiation
     int bulletsHit = 0;
@@ -180,7 +190,11 @@ int main()
                 LaserUpdate(&lasers[i], dt);
                 HandleLaserCollision(&player, lasers[i], dt);
             }
+
+            // Background logic
+            UpdateBackground(stars, MAX_STARS, &starTimerFront, &starTimerBack, textures.star, dt);
             
+            // Player death
             if (player.hp <= 0)
             {
                 PlayerDeath(&player);
@@ -208,6 +222,9 @@ int main()
             DrawMainMenu(mainMenuRecs);
             break;
         case PLAYING:
+            // Background drawing
+            DrawBackground(stars, MAX_STARS);
+            // Entity drawing
             BulletDrawing(bullets, MAX_BULLETS, textures);
             PlayerDrawing(&player, redShip, whiteShip);
             LaserDrawing(lasers, MAX_LASERS);
@@ -265,10 +282,19 @@ int main()
                     lasersActive++;
                 }
             }
+            int starsActive = 0;
+            for (int i = 0; i < MAX_STARS; i++)
+            {
+                if (stars[i].active)
+                {
+                    starsActive++;
+                }
+            }
             DrawText(TextFormat("Bullets active: %d", bulletAmountActive), 0, 20, 10, WHITE);
             DrawText(TextFormat("Enemies active: %d", enemiesActive), 0, 30, 10, WHITE);
             DrawText(TextFormat("Lasers active: %d", lasersActive), 0, 40, 10, WHITE);
             DrawText(TextFormat("GameState: %d", gameState), 0, 50, 10, WHITE);
+            DrawText(TextFormat("Stars active: %d", starsActive), 0, 60, 10, WHITE);
             //player.hp = 100;
         }
         EndTextureMode();

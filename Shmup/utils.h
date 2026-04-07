@@ -22,6 +22,7 @@ typedef struct
     Texture2D enemySniper;
     Texture2D enemyGrunt;
     Texture2D enemyBullet;
+    Texture2D star;
 }Textures;
 
 void PlayFX(Sound effect);

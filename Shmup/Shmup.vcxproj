@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="background.c" />
     <ClCompile Include="bullet.c" />
     <ClCompile Include="collision.c" />
     <ClCompile Include="debug.c" />
@@ -38,6 +39,7 @@
     </Text>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="background.h" />
     <ClInclude Include="bullet.h" />
     <ClInclude Include="collision.h" />
     <ClInclude Include="debug.h" />
