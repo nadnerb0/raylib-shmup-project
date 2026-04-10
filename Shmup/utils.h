@@ -21,6 +21,7 @@ typedef struct
     Texture2D laserCharge;
     Texture2D enemySniper;
     Texture2D enemyGrunt;
+    Texture2D enemyFodder;
     Texture2D enemyBullet;
     Texture2D star;
 }Textures;

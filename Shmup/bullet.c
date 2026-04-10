@@ -114,7 +114,7 @@ void SpawnEnemyLaser(Enemy* enemy, Laser lasers[], int maxLasers, Sound enemyLas
                     .active = true,
                     .isPlayerLaser = false
                 };
-                lasers[i].position.y = enemy->position.y;
+                lasers[i].position.y = enemy->position.y - 10;
                 lasers[i].position.x = enemy->position.x - lasers[i].width / 2;
                 enemy->isSniping = true;
                 break;
@@ -177,7 +177,7 @@ void BulletUpdate(Bullet* bullet, float dt)
     bullet->position.y += bullet->yDir * bullet->speed * dt;
     bullet->hitbox.y += bullet->yDir * bullet->speed * dt;
 
-    if (bullet->position.y < 0 || bullet->position.y > yRes)
+    if (bullet->position.y < -50 || bullet->position.y > yRes)
     {
         bullet->active = false;
     }

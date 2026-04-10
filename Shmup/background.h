@@ -6,12 +6,13 @@
 
 typedef struct
 {
+	// pos kan weg
 	Texture2D texture;
-	Vector2 pos;
 	Rectangle sourceRec;
 	Rectangle destRec;
 	Vector2 origin;
 	float speed;
+	float rotation;
 	int size;
 	int layer;
 	bool active;
@@ -20,6 +21,7 @@ typedef struct
 typedef enum
 {
 	FRONT,
+	MIDDLE,
 	BACK
 }ParallaxLayer;
 
@@ -31,7 +33,7 @@ void UpdateStarPos(Star* star, float dt);
 
 void InitBackground(Star stars[]);
 
-void UpdateBackground(Star stars[], int maxStars, float* starTimerFront, float* starTimerBack, Texture2D starTexture, float dt);
+void UpdateBackground(Star stars[], int maxStars, float* starTimerFront, float* starTimerMid, float* starTimerBack, Texture2D starTexture, float dt);
 
 void DrawStar(Star star);
 

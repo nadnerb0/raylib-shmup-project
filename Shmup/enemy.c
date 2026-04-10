@@ -13,12 +13,23 @@ void InitEnemy(Enemy* enemy, EnemyType enemyType, Vector2 position, Vector2 velo
         enemy->velocity = velocity;
         enemy->width = 30;
         enemy->height = 20;
-        enemy->hitbox = (Rectangle){ position.x - enemy->width / 2, position.y - enemy->height / 2, enemy->width, enemy->height };
+        enemy->hitbox = (Rectangle){ position.x - enemy->width / 2, position.y - enemy->height, enemy->width, enemy->height };
         enemy->texture = textures.enemyGrunt;
         enemy->enemyType = GRUNT;
         enemy->fireRate = 0.5f;
         enemy->shootTimer = 0.0f;
         enemy->hasEnteredBounds = false;
+        enemy->active = true;
+        break;
+    case FODDER:
+        enemy->hp = 1;
+        enemy->position = position;
+        enemy->velocity = velocity;
+        enemy->width = 24;
+        enemy->height = 24;
+        enemy->hitbox = (Rectangle){ position.x - enemy->width / 2, position.y - enemy->height, enemy->width, enemy->height };
+        enemy->texture = textures.enemyFodder;
+        enemy->enemyType = FODDER;
         enemy->active = true;
         break;
     case SNIPER:
@@ -27,7 +38,7 @@ void InitEnemy(Enemy* enemy, EnemyType enemyType, Vector2 position, Vector2 velo
         enemy->velocity = velocity;
         enemy->width = 40;
         enemy->height = 40;
-        enemy->hitbox = (Rectangle){ position.x - enemy->width / 2, position.y - enemy->height / 2, enemy->width, enemy->height };
+        enemy->hitbox = (Rectangle){ position.x - enemy->width / 2, position.y - enemy->height, enemy->width, enemy->height };
         enemy->texture = textures.enemySniper;
         enemy->enemyType = SNIPER;
         enemy->fireRate = 3.0f;
@@ -35,6 +46,7 @@ void InitEnemy(Enemy* enemy, EnemyType enemyType, Vector2 position, Vector2 velo
         enemy->isSniping = false;
         enemy->hasEnteredBounds = false;
         enemy->active = true;
+        break;
     }
 }
 
@@ -57,7 +69,7 @@ void EnemySpawning(Enemy enemies[], int maxEnemies, SpawnEvent wave[], int waveS
     }
 }
 
-void EnemyUpdate(Enemy* enemy, SpawnEvent wave[], int* playerScore, float dt)
+void EnemyUpdate(Enemy* enemy, int* playerScore, float dt)
 {
     EnemyMovement(enemy, dt);
 
@@ -87,7 +99,7 @@ void EnemyUpdate(Enemy* enemy, SpawnEvent wave[], int* playerScore, float dt)
 void EnemyMovement(Enemy* enemy, float dt)
 {
     // Position and hitbox update
-    if (enemy->enemyType == GRUNT)
+    if (enemy->enemyType == GRUNT || enemy->enemyType == FODDER)
     {
         enemy->position.x += enemy->velocity.x * dt;
         enemy->position.y += enemy->velocity.y * dt;
@@ -131,10 +143,13 @@ void EnemyDrawing(Enemy enemies[], int maxEnemies, Textures textures)
             switch (enemies[i].enemyType)
             {
             case GRUNT:
-                DrawTexture(enemies[i].texture, enemies[i].position.x - enemies[i].texture.width/2, enemies[i].position.y - enemies[i].texture.height / 1.5, WHITE);
+                DrawTexture(enemies[i].texture, enemies[i].position.x - enemies[i].texture.width / 2, enemies[i].position.y - enemies[i].texture.height, WHITE);
                 break;
             case SNIPER:
-                DrawTexture(enemies[i].texture, enemies[i].position.x - enemies[i].texture.width/2, enemies[i].position.y - enemies[i].height, WHITE);
+                DrawTexture(enemies[i].texture, enemies[i].position.x - enemies[i].texture.width / 2, enemies[i].position.y - enemies[i].texture.height, WHITE);
+                break;
+            case FODDER:
+                DrawTexture(enemies[i].texture, enemies[i].position.x - enemies[i].texture.width / 2, enemies[i].position.y - enemies[i].texture.height, WHITE);
                 break;
             }
         }
