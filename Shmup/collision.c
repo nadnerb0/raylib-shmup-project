@@ -7,7 +7,10 @@
 
 void HandlePlayerCollision(Player* player, Enemy* enemy)
 {
-	if (CheckCollisionCircleRec(player->position, player->hitboxRadius, enemy->hitbox))
+	if (player->invincibility > 0)
+		return;
+
+	else if (CheckCollisionCircleRec(player->position, player->hitboxRadius, enemy->hitbox))
 	{
 		PlayerDamaged(player);
 		enemy->hp -= 1;

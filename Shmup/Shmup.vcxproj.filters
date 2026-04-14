@@ -54,6 +54,12 @@
     <ClCompile Include="background.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="level.h">
+      <Filter>Header Files</Filter>
+    </ClCompile>
+    <ClCompile Include="level.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="mainMenu.h">

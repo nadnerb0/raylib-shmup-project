@@ -12,49 +12,73 @@ typedef enum
     SNIPER
 }EnemyType;
 
-typedef struct
-{
-    EnemyType enemyType;
-    Vector2 position;
-    Vector2 velocity;
-    float spawnTime;
-    bool hasSpawned;
-}SpawnEvent;
-
 /*
 Fix voor collision/piercing bullets:
 elke enemy heeft enemyID, gebaseerd op enemyCount (dus eerste spawn = 0, 100e spawn = 100), dit kan elke stage resetten of niet.
 elke Bullet heeft een lijst met ID's (hitList) waarmee hij gecollide heeft, als hij hetzelfde ID weer tegenkomt -> geen collision
-dan kan ook: if(sizeof(hitList)>pierceAmount) -> Bullet = {0};ss
+dan kan ook: if(sizeof(hitList)>pierceAmount) -> Bullet = {0};
 */
+
+typedef enum
+{
+    LINE_MOVEMENT,
+    SINE_MOVEMENT
+}MovementTypeTag;
+
+typedef struct
+{
+    Vector2 direction;
+}LineMovement;
+
+typedef struct
+{
+    float frequency;
+    float amplitude;
+    Vector2 direction;
+    float sineTimer;
+}SineMovement;
+
+typedef struct
+{
+    MovementTypeTag tag;
+    union
+    {
+        LineMovement line;
+        SineMovement sine;
+    };
+}MovementType;
 
 typedef struct
 {
     Vector2 position;
-    Vector2 velocity;
+    MovementType movement;
     Rectangle hitbox;
     Texture2D texture;
+    EnemyType enemyType;
+    float movementSpeed;
     float width;
     float height;
     float hp;
     float fireRate;
     float shootTimer;
-    EnemyType enemyType;
     bool isSniping;
     bool hasEnteredBounds;
     bool active;
 }Enemy;
 
-void InitEnemy(Enemy* enemy, EnemyType enemyType, Vector2 position, Vector2 velocity, Textures textures);
+// Initializes enemy based on type
+void InitEnemy(Enemy* enemy, Enemy enemySpawn, Textures textures);
 
-void EnemySpawning(Enemy enemies[], int maxEnemies, SpawnEvent wave[], int waveSize, float* waveTimer, float dt, Textures textures);
-
+// Update enemy state
 void EnemyUpdate(Enemy* enemy, int* playerScore, float dt);
 
+// Update enemy movement
 void EnemyMovement(Enemy* enemy, float dt);
 
+// Process enemy death
 void EnemyDeath(Enemy* enemy, int* playerScore);
 
+// Draws all enemies
 void EnemyDrawing(Enemy enemies[], int maxEnemies, Textures textures);
 
 bool IsInBounds(Enemy enemy);

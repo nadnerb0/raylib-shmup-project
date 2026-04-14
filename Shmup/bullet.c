@@ -81,7 +81,7 @@ void SpawnEnemyBullet(Enemy* enemy, Bullet bullets[], int maxBullets, Sound enem
                         .isPlayerBullet = false
                     };
                     bullets[j].position.x = enemy->position.x - bullets[j].width / 2;
-                    bullets[j].position.y = enemy->position.y + 5;
+                    bullets[j].position.y = enemy->position.y;
                     bullets[j].hitbox = (Rectangle){ bullets[j].position.x, bullets[j].position.y, bullets[j].width, bullets[j].height };
                     enemy->shootTimer = 0.0f;
                     break;

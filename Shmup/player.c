@@ -14,6 +14,7 @@ void PlayerInit(Player* player, Texture2D redSprite)
     player->width = player->playerSprite.width;
     player->height = player->playerSprite.height;
     player->invincibility = 0.0f;
+    player->isDead = false;
     // Initial player position
     player->position.x = xRes / 2;
     player->position.y = yRes / 1.5;

@@ -2,18 +2,19 @@
 #include "utils.h"
 #include "enemy.h"
 
-void InitEnemy(Enemy* enemy, EnemyType enemyType, Vector2 position, Vector2 velocity, Textures textures)
+void InitEnemy(Enemy* enemy, Enemy enemySpawn, Textures textures)
 {
     *enemy = (Enemy){ 0 };
-    switch (enemyType)
+    switch (enemySpawn.enemyType)
     {
     case GRUNT:
         enemy->hp = 2;
-        enemy->position = position;
-        enemy->velocity = velocity;
+        enemy->position = enemySpawn.position;
+        enemy->movement = enemySpawn.movement;
+        enemy->movementSpeed = 100;
         enemy->width = 30;
         enemy->height = 20;
-        enemy->hitbox = (Rectangle){ position.x - enemy->width / 2, position.y - enemy->height, enemy->width, enemy->height };
+        enemy->hitbox = (Rectangle){ enemy->position.x - enemy->width / 2, enemy->position.y - enemy->height, enemy->width, enemy->height };
         enemy->texture = textures.enemyGrunt;
         enemy->enemyType = GRUNT;
         enemy->fireRate = 0.5f;
@@ -23,22 +24,25 @@ void InitEnemy(Enemy* enemy, EnemyType enemyType, Vector2 position, Vector2 velo
         break;
     case FODDER:
         enemy->hp = 1;
-        enemy->position = position;
-        enemy->velocity = velocity;
+        enemy->position = enemySpawn.position;
+        enemy->movement = enemySpawn.movement;
+        enemy->movementSpeed = 150;
         enemy->width = 24;
         enemy->height = 24;
-        enemy->hitbox = (Rectangle){ position.x - enemy->width / 2, position.y - enemy->height, enemy->width, enemy->height };
+        enemy->hitbox = (Rectangle){ enemy->position.x - enemy->width / 2, enemy->position.y - enemy->height, enemy->width, enemy->height };
         enemy->texture = textures.enemyFodder;
         enemy->enemyType = FODDER;
+        enemy->hasEnteredBounds = false;
         enemy->active = true;
         break;
     case SNIPER:
         enemy->hp = 5;
-        enemy->position = position;
-        enemy->velocity = velocity;
+        enemy->position = enemySpawn.position;
+        enemy->movement = enemySpawn.movement;
+        enemy->movementSpeed = 50;
         enemy->width = 40;
         enemy->height = 40;
-        enemy->hitbox = (Rectangle){ position.x - enemy->width / 2, position.y - enemy->height, enemy->width, enemy->height };
+        enemy->hitbox = (Rectangle){ enemy->position.x - enemy->width / 2, enemy->position.y - enemy->height, enemy->width, enemy->height };
         enemy->texture = textures.enemySniper;
         enemy->enemyType = SNIPER;
         enemy->fireRate = 3.0f;
@@ -47,25 +51,6 @@ void InitEnemy(Enemy* enemy, EnemyType enemyType, Vector2 position, Vector2 velo
         enemy->hasEnteredBounds = false;
         enemy->active = true;
         break;
-    }
-}
-
-void EnemySpawning(Enemy enemies[], int maxEnemies, SpawnEvent wave[], int waveSize, float* waveTimer, float dt, Textures textures)
-{
-    *waveTimer += dt; 
-    for (int j = 0; j < waveSize; j++)
-    {
-        for (int i = 0; i < maxEnemies; i++)
-        {
-            if (enemies[i].active)
-                continue;
-
-            if (*waveTimer >= wave[j].spawnTime && !wave[j].hasSpawned)
-            {
-                InitEnemy(&enemies[i], wave[j].enemyType, wave[j].position, wave[j].velocity, textures);
-                wave[j].hasSpawned = true;
-            }
-        }
     }
 }
 
@@ -98,26 +83,37 @@ void EnemyUpdate(Enemy* enemy, int* playerScore, float dt)
 
 void EnemyMovement(Enemy* enemy, float dt)
 {
-    // Position and hitbox update
-    if (enemy->enemyType == GRUNT || enemy->enemyType == FODDER)
+    switch (enemy->movement.tag)
     {
-        enemy->position.x += enemy->velocity.x * dt;
-        enemy->position.y += enemy->velocity.y * dt;
-        enemy->hitbox.x += enemy->velocity.x * dt;
-        enemy->hitbox.y += enemy->velocity.y * dt;
-    }
-
-    else if (enemy->enemyType == SNIPER && !enemy->isSniping)    // No movement while sniping
-    {
-        enemy->position.x += enemy->velocity.x * dt;
-        enemy->position.y += enemy->velocity.y * dt;
-        enemy->hitbox.x += enemy->velocity.x * dt;
-        enemy->hitbox.y += enemy->velocity.y * dt;
-
-        // Bouncing left and right
-        if (IsInBounds(*enemy) == false && enemy->hasEnteredBounds)
+        case LINE_MOVEMENT:
         {
-            enemy->velocity.x *= -1.0;
+            if (enemy->enemyType == SNIPER && !enemy->isSniping)    // No movement while sniping
+            {
+                enemy->position.x += enemy->movement.line.direction.x * enemy->movementSpeed * dt;
+                enemy->position.y += enemy->movement.line.direction.y * enemy->movementSpeed * dt;
+                enemy->hitbox.x += enemy->movement.line.direction.x * enemy->movementSpeed * dt;
+                enemy->hitbox.y += enemy->movement.line.direction.y * enemy->movementSpeed * dt;
+
+                // Bouncing left and right
+                if (IsInBounds(*enemy) == false && enemy->hasEnteredBounds)
+                {
+                    enemy->movement.line.direction.x *= -1.0;
+                }
+            }
+            else if (enemy->enemyType != SNIPER)
+            {
+                enemy->position.x += enemy->movement.line.direction.x * enemy->movementSpeed * dt;
+                enemy->position.y += enemy->movement.line.direction.y * enemy->movementSpeed * dt;
+                enemy->hitbox.x += enemy->movement.line.direction.x * enemy->movementSpeed * dt;
+                enemy->hitbox.y += enemy->movement.line.direction.y * enemy->movementSpeed * dt;
+            }
+            break;
+        }
+        case SINE_MOVEMENT:
+        {
+            enemy->movement.sine.sineTimer += dt;
+            
+            break;
         }
     }
 }
@@ -170,7 +166,7 @@ bool IsInBounds(Enemy enemy)
         }
         else return true;
     }
-    // Other enemies have "bigger" bounds
+    // Other enemies have bigger bounds
     else if (enemy.position.x < 0 - enemy.texture.width || 
         enemy.position.y < 0 - enemy.texture.height || 
         enemy.position.x > xRes + enemy.texture.width || 

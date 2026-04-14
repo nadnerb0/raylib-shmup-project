@@ -9,12 +9,13 @@
 #include "gameOver.h"
 #include "collision.h"
 #include "background.h"
+#include "level.h"
 
 #define MAX(a, b) ((a)>(b)? (a) : (b))
 #define MIN(a, b) ((a)<(b)? (a) : (b))
 
 #define MAX_BULLETS 100
-#define MAX_ENEMIES 20
+#define MAX_ENEMIES 100
 #define MAX_LASERS 10
 #define MAX_STARS 150
 
@@ -71,45 +72,31 @@ int main()
 
     // Player initialization
     Player player = { 0 };
-    PlayerInit(&player, redShip);
 
     // Loading sounds
     Sound playerShootSound = LoadSound("Audio/playerPew.wav");
 
     // Star pool initialization
-    Star stars[MAX_STARS] = { 0 };
+    static Star stars[MAX_STARS] = { 0 };
     // Enemy pool initialization
-    Enemy enemies[MAX_ENEMIES] = { 0 };
+    static Enemy enemies[MAX_ENEMIES] = { 0 };
     // Bullet pool initialization
-    Bullet bullets[MAX_BULLETS] = { 0 };
+    static Bullet bullets[MAX_BULLETS] = { 0 };
     // Laser pool initialization
-    Laser lasers[MAX_LASERS] = { 0 };
+    static Laser lasers[MAX_LASERS] = { 0 };
 
-    // Initialize starting background
-    InitBackground(stars, textures.star);
     // Background timers initialization
     float starTimerFront = 0.0f;
     float starTimerMid = 0.0f;
     float starTimerBack = 0.0f;
 
+    // Initialize starting background
+    InitBackground(stars, textures.star);
+
     // Statistic instantiation
     int bulletsHit = 0;
     int playerKills = 0;
     int playerScore = 0;
-
-    // Initiating wave structure
-    SpawnEvent wave1[] =
-    {
-        {.enemyType = SNIPER, .position = (Vector2) { -40,50 }, .velocity = (Vector2) { 60,0 }, .spawnTime = 0.0f, .hasSpawned = false},
-        {.enemyType = FODDER, .position = (Vector2) { 0,150 }, .velocity = (Vector2) { 20,0 }, .spawnTime = 0.0f, .hasSpawned = false},
-        {.enemyType = FODDER, .position = (Vector2) { xRes,150 }, .velocity = (Vector2) { -20,0 }, .spawnTime = 0.0f, .hasSpawned = false},
-        {.enemyType = GRUNT, .position = (Vector2) { 0,100 }, .velocity = (Vector2) { 100,0 }, .spawnTime = 0.0f, .hasSpawned = false},
-        {.enemyType = GRUNT, .position = (Vector2) { xRes,70 }, .velocity = (Vector2) { -100,0 }, .spawnTime = 0.0f, .hasSpawned = false},
-        {.enemyType = GRUNT, .position = (Vector2) { 0,100 }, .velocity = (Vector2) { 100,0 }, .spawnTime = 1.0f, .hasSpawned = false},
-        {.enemyType = GRUNT, .position = (Vector2) { xRes,70 }, .velocity = (Vector2) { -100,0 }, .spawnTime = 1.0f, .hasSpawned = false},
-        {.enemyType = GRUNT, .position = (Vector2) { 0,100 }, .velocity = (Vector2) { 100,0 }, .spawnTime = 2.0f, .hasSpawned = false},
-        {.enemyType = GRUNT, .position = (Vector2) { xRes,70 }, .velocity = (Vector2) { -100,0 }, .spawnTime = 2.0f, .hasSpawned = false}
-    };
     
     // Rectangles for menus
     Rectangle mainMenuRecs[3] = { 0 };
@@ -144,11 +131,27 @@ int main()
         case MENU:
             // Menu behaviour
             gameState = MenuToPlaying(mainMenuRecs, virtualMouse);
+
+            UpdateBackground(stars, MAX_STARS, &starTimerFront, &starTimerMid, &starTimerBack, textures.star, dt);
+
             if (gameState == PLAYING)
             {
                 DisableCursor();
 
-                // Reinitialize player/waves
+                // Empty arrays
+                memset(enemies, 0, sizeof(enemies));
+                memset(bullets, 0, sizeof(bullets));
+                memset(lasers, 0, sizeof(lasers));
+                // Reset stats
+                bulletsHit = 0;
+                playerKills = 0;
+                playerScore = 0;
+                // Reset wave timer
+                waveTimer = 0;
+                // Initialize player
+                PlayerInit(&player, redShip);
+                // Initialize first wave
+                InitWave1(level1wave1);
             }
             break;
         case PLAYING:
@@ -160,14 +163,11 @@ int main()
             // Player bullet spawning
             SpawnPlayerBullet(&player, bullets, MAX_BULLETS, playerShootSound, textures.bullet, dt);
 
-            // Temporary spawning mechanics
-            int waveSize = sizeof(wave1) / sizeof(wave1[0]);
-            EnemySpawning(enemies, MAX_ENEMIES, wave1, waveSize, &waveTimer, dt, textures);
-
-            // Updating states
+            // Updating world state
             EnemyLoop(&player, enemies, bullets, lasers, MAX_ENEMIES, MAX_BULLETS, MAX_LASERS, &playerScore, playerShootSound, textures, dt);
             BulletLoop(&player, enemies, bullets, &bulletsHit, dt);
             LaserLoop(&player, lasers, dt);
+            WaveLoop(enemies, MAX_ENEMIES, level1wave1, WAVE1_SIZE, &waveTimer, dt, textures);
 
             // Background logic
             UpdateBackground(stars, MAX_STARS, &starTimerFront, &starTimerMid, &starTimerBack, textures.star, dt);
@@ -199,6 +199,7 @@ int main()
         {
         case MENU:
             // Menu drawing
+            DrawBackground(stars, MAX_STARS);
             DrawMainMenu(mainMenuRecs);
             break;
         case PLAYING:
@@ -248,11 +249,26 @@ int main()
                 }
             }
             int enemiesActive = 0;
+            int snipersActive = 0;
+            int foddersActive = 0;
+            int gruntsActive = 0;
             for (int i = 0; i < MAX_ENEMIES; i++)
             {
                 if (enemies[i].active)
                 {
                     enemiesActive++;
+                    if (enemies[i].enemyType == FODDER)
+                    {
+                        foddersActive++;
+                    }
+                    else if (enemies[i].enemyType == GRUNT)
+                    {
+                        gruntsActive++;
+                    }
+                    else if (enemies[i].enemyType == SNIPER)
+                    {
+                        snipersActive++;
+                    }
                 }
             }
             int lasersActive = 0;
@@ -273,9 +289,12 @@ int main()
             }
             DrawText(TextFormat("Bullets active: %d", bulletAmountActive), 0, 20, 10, WHITE);
             DrawText(TextFormat("Enemies active: %d", enemiesActive), 0, 30, 10, WHITE);
-            DrawText(TextFormat("Lasers active: %d", lasersActive), 0, 40, 10, WHITE);
-            DrawText(TextFormat("GameState: %d", gameState), 0, 50, 10, WHITE);
-            DrawText(TextFormat("Stars active: %d", starsActive), 0, 60, 10, WHITE);
+            DrawText(TextFormat("Fodders active: %d", foddersActive), 0, 37, 10, WHITE);
+            DrawText(TextFormat("Grunts active: %d", gruntsActive), 0, 44, 10, WHITE);
+            DrawText(TextFormat("Snipers active: %d", snipersActive), 0, 52, 10, WHITE);
+            DrawText(TextFormat("Lasers active: %d", lasersActive), 0, 60, 10, WHITE);
+            DrawText(TextFormat("GameState: %d", gameState), 0, 70, 10, WHITE);
+            DrawText(TextFormat("Stars active: %d", starsActive), 0, 80, 10, WHITE);
             //player.hp = 100;
         }
         EndTextureMode();
@@ -283,7 +302,7 @@ int main()
         // Drawing
         BeginDrawing();
         ClearBackground(BLACK);
-        // Drawing texture with game independent of window size
+        // Drawing texture with game based on window size
         DrawTexturePro(target.texture, (Rectangle) { 0.0f, 0.0f, (float)target.texture.width, (float)-target.texture.height },
             (Rectangle) {(GetScreenWidth() - ((float)xRes * scale)) * 0.5f, (GetScreenHeight() - ((float)yRes * scale)) * 0.5f, (float)xRes* scale, (float)yRes* scale}, (Vector2) { 0, 0 }, 0.0f, WHITE);
         DrawRectangleLines((GetScreenWidth() - ((float)xRes * scale)) * 0.5f, (GetScreenHeight() - ((float)yRes * scale)) * 0.5f, (float)xRes* scale, (float)yRes* scale - 1, WHITE);
@@ -307,7 +326,7 @@ void EnemyLoop(Player* player, Enemy enemies[], Bullet bullets[], Laser lasers[]
         if (!enemies[i].active)
             continue;
 
-        EnemyUpdate(&enemies[i], &playerScore, dt);
+        EnemyUpdate(&enemies[i], playerScore, dt);
         if (enemies[i].enemyType == GRUNT)
         {
             SpawnEnemyBullet(&enemies[i], bullets, MAX_BULLETS, playerShootSound, textures.enemyBullet, dt);
@@ -316,7 +335,7 @@ void EnemyLoop(Player* player, Enemy enemies[], Bullet bullets[], Laser lasers[]
         {
             SpawnEnemyLaser(&enemies[i], lasers, MAX_LASERS, playerShootSound, textures.laser, textures.laserCharge, dt);
         }
-        HandlePlayerCollision(&player, &enemies[i]);
+        HandlePlayerCollision(player, &enemies[i]);
     }
 }
 
